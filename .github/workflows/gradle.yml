@@ -18,49 +18,73 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # Android Command-line Tools 16 requires JDK 17.
-      - name: Set up JDK 17 for Android SDK tools
+      # The runner image already contains Android SDK command-line tools.
+      # Do NOT use android-actions/setup-android here: its default package
+      # list still asks sdkmanager for the removed legacy package "tools".
+      - name: Set up JDK 17 for sdkmanager
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK 27 and Build Tools 28.0.3
+      - name: Locate preinstalled Android SDK
+        id: android
         shell: bash
         run: |
-          set -o pipefail
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-27" "build-tools;28.0.3"
+          set -e
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "$SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
+          SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager 2>/dev/null | sort -V | tail -n 1)"
+          if [ -z "$SDKMANAGER" ]; then
+            SDKMANAGER="$(command -v sdkmanager || true)"
+          fi
+          if [ -z "$SDKMANAGER" ]; then
+            echo "sdkmanager not found. Android SDK root: $SDK_ROOT"
+            exit 1
+          fi
+          echo "sdkmanager=$SDKMANAGER" >> "$GITHUB_OUTPUT"
+          echo "Using Android SDK: $SDK_ROOT"
+          echo "Using sdkmanager: $SDKMANAGER"
+          "$SDKMANAGER" --version
 
-      # Gradle 6.1.1 runs on Java 8-13; it cannot run on Java 17.
-      - name: Switch to JDK 8 for legacy Gradle 6.1.1
+      - name: Accept SDK licenses and install required packages
+        shell: bash
+        env:
+          SDKMANAGER: ${{ steps.android.outputs.sdkmanager }}
+        run: |
+          set -e
+          yes | "$SDKMANAGER" --licenses >/dev/null
+          "$SDKMANAGER" "platform-tools" "platforms;android-27" "build-tools;28.0.3"
+
+      # This project uses Gradle 6.1.1 + Android Gradle Plugin 4.0.0-alpha09.
+      # Switch back to JDK 8 only after SDK manager tasks are complete.
+      - name: Set up JDK 8 for legacy Gradle
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "8"
 
-      - name: Verify Java and Android SDK
+      - name: Verify build toolchain
+        shell: bash
         run: |
           java -version
           test -d "$ANDROID_HOME/platforms/android-27"
           test -d "$ANDROID_HOME/build-tools/28.0.3"
+          test -x ./gradlew || chmod +x ./gradlew
 
       - name: Build F-Droid debug APK
-        run: |
-          chmod +x ./gradlew
-          ./gradlew --no-daemon --stacktrace :app:assembleFdroidDebug
+        run: ./gradlew --no-daemon --stacktrace :app:assembleFdroidDebug
 
-      - name: Find generated APK
+      - name: Locate generated APK
         id: apk
         shell: bash
         run: |
           APK_PATH="$(find app/build/outputs/apk -type f -name '*.apk' -print -quit)"
           if [ -z "$APK_PATH" ]; then
-            echo "APK was not generated."
-            find app/build/outputs -maxdepth 5 -type f -print || true
+            echo "APK was not generated. Build output files:"
+            find app/build/outputs -type f -print || true
             exit 1
           fi
           echo "path=$APK_PATH" >> "$GITHUB_OUTPUT"
