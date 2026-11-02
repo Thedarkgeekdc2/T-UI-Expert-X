@@ -2,14 +2,18 @@ package de.reckendrees.systems.tui.expert.commands.main.raw;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
+import android.content.pm.ProviderInfo;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.security.NetworkSecurityPolicy;
 import android.support.v4.content.ContextCompat;
 
 import java.io.BufferedReader;
@@ -28,7 +32,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.reckendrees.systems.tui.expert.R;
-import de.reckendrees.systems.tui.expert.commands.CommandAbstraction;
 import de.reckendrees.systems.tui.expert.commands.ExecutePack;
 import de.reckendrees.systems.tui.expert.commands.main.MainPack;
 import de.reckendrees.systems.tui.expert.commands.main.Param;
@@ -37,8 +40,10 @@ import de.reckendrees.systems.tui.expert.tuils.Tuils;
 
 /**
  * T-UI Expert X Security & Privacy Center.
- * Audits only this app's manifest/runtime permission state and known T-UI config
+ * Audits this app's manifest/runtime permission state and known T-UI config
  * files. Secret values are never displayed or copied into generated reports.
+ *
+ * Compatibility: this source is written for the project's compileSdkVersion 27.
  */
 public class security extends ParamCommand {
 
@@ -79,21 +84,32 @@ public class security extends ParamCommand {
         static SecurityParam get(String value) {
             if (value == null) return null;
             String normalized = value.toLowerCase(Locale.US);
-            for (SecurityParam param : values()) if (normalized.endsWith(param.label())) return param;
+            for (SecurityParam param : values()) {
+                if (normalized.endsWith(param.label())) return param;
+            }
             return null;
         }
+
         static String[] labels() {
             SecurityParam[] values = values();
             String[] labels = new String[values.length];
             for (int i = 0; i < values.length; i++) labels[i] = values[i].label();
             return labels;
         }
+
         @Override public String label() { return Tuils.MINUS + name(); }
-        @Override public String onNotArgEnough(ExecutePack pack, int n) { return pack.context.getString(R.string.help_security); }
-        @Override public String onArgNotFound(ExecutePack pack, int index) { return pack.context.getString(R.string.help_security); }
+        @Override public String onNotArgEnough(ExecutePack pack, int n) {
+            return pack.context.getString(R.string.help_security);
+        }
+        @Override public String onArgNotFound(ExecutePack pack, int index) {
+            return pack.context.getString(R.string.help_security);
+        }
     }
 
-    @Override protected Param paramForString(MainPack pack, String param) { return SecurityParam.get(param); }
+    @Override protected Param paramForString(MainPack pack, String param) {
+        return SecurityParam.get(param);
+    }
+
     @Override public String[] params() { return SecurityParam.labels(); }
     @Override protected String doThings(ExecutePack pack) { return null; }
     @Override public int priority() { return 3; }
@@ -105,6 +121,20 @@ public class security extends ParamCommand {
         return context.getPackageManager().getPackageInfo(context.getPackageName(), flags);
     }
 
+    /**
+     * Android's NetworkSecurityPolicy is available from API 23. Older Android
+     * releases do not enforce the manifest cleartext policy, so report true.
+     * If policy inspection fails, return true (the conservative warning state).
+     */
+    private static boolean isCleartextTrafficPermitted() {
+        if (Build.VERSION.SDK_INT < 23) return true;
+        try {
+            return NetworkSecurityPolicy.getInstance().isCleartextTrafficPermitted();
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
     private static String audit(Context context) {
         StringBuilder out = new StringBuilder("T-UI EXPERT X — SECURITY AUDIT");
         try {
@@ -113,7 +143,7 @@ public class security extends ParamCommand {
             ApplicationInfo app = context.getApplicationInfo();
             boolean backup = (app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0;
             boolean debug = (app.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-            boolean cleartext = Build.VERSION.SDK_INT < 23 || app.usesCleartextTraffic;
+            boolean cleartext = isCleartextTrafficPermitted();
             int exposed = countExportedWithoutPermission(info);
 
             line(out, "Requested permissions", String.valueOf(permissions.total));
@@ -138,7 +168,9 @@ public class security extends ParamCommand {
         try {
             PackageInfo info = packageInfo(context);
             String[] requested = info.requestedPermissions;
-            if (requested == null || requested.length == 0) return out.append(Tuils.NEWLINE).append("No requested permissions recorded.").toString();
+            if (requested == null || requested.length == 0) {
+                return out.append(Tuils.NEWLINE).append("No requested permissions recorded.").toString();
+            }
             int granted = 0;
             int denied = 0;
             int dangerousGranted = 0;
@@ -165,7 +197,7 @@ public class security extends ParamCommand {
         ApplicationInfo app = context.getApplicationInfo();
         boolean backup = (app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0;
         boolean debug = (app.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-        boolean cleartext = Build.VERSION.SDK_INT < 23 || app.usesCleartextTraffic;
+        boolean cleartext = isCleartextTrafficPermitted();
         line(out, "Android backup", backup ? "enabled" : "disabled");
         line(out, "Debuggable", debug ? "yes" : "no");
         line(out, "Cleartext traffic", cleartext ? "not fully blocked" : "blocked on Android 6.0+ by manifest policy");
@@ -186,7 +218,9 @@ public class security extends ParamCommand {
     private static String configReport(Context context) {
         StringBuilder out = new StringBuilder("T-UI CONFIGURATION SAFETY AUDIT");
         File folder = Tuils.getFolder();
-        if (folder == null || !folder.isDirectory()) return out.append(Tuils.NEWLINE).append("T-UI config folder not found or not accessible.").toString();
+        if (folder == null || !folder.isDirectory()) {
+            return out.append(Tuils.NEWLINE).append("T-UI config folder not found or not accessible.").toString();
+        }
 
         String[] names = new String[]{"expert.xml", "behavior.xml", "notifications.xml", "rss.xml", "cmd.xml", "alias.txt"};
         int read = 0;
@@ -202,10 +236,18 @@ public class security extends ParamCommand {
         }
         String expert = readLimited(new File(folder, "expert.xml"), 512 * 1024);
         if (expert != null) {
-            if (hasValue(expert, "remote_pass") || hasValue(expert, "remote_password")) out.append(Tuils.NEWLINE).append("[HIGH] Remote password value exists in expert.xml; value intentionally hidden. Rotate it and disable the companion remote service when not needed.");
-            if (hasValue(expert, "exit_password")) out.append(Tuils.NEWLINE).append("[MEDIUM] Exit password is stored in the external XML config; it is not encrypted by this app.");
-            if (isTrue(expert, "use_root")) out.append(Tuils.NEWLINE).append("[HIGH] Root command mode is enabled. Only run commands you have reviewed.");
-            if (hasValue(expert, "custom_command")) out.append(Tuils.NEWLINE).append("[MEDIUM] A custom command is configured. Review its content locally before enabling periodic execution.");
+            if (hasValue(expert, "remote_pass") || hasValue(expert, "remote_password")) {
+                out.append(Tuils.NEWLINE).append("[HIGH] Remote password value exists in expert.xml; value intentionally hidden. Rotate it and disable the companion remote service when not needed.");
+            }
+            if (hasValue(expert, "exit_password")) {
+                out.append(Tuils.NEWLINE).append("[MEDIUM] Exit password is stored in the external XML config; it is not encrypted by this app.");
+            }
+            if (isTrue(expert, "use_root")) {
+                out.append(Tuils.NEWLINE).append("[HIGH] Root command mode is enabled. Only run commands you have reviewed.");
+            }
+            if (hasValue(expert, "custom_command")) {
+                out.append(Tuils.NEWLINE).append("[MEDIUM] A custom command is configured. Review its content locally before enabling periodic execution.");
+            }
         } else {
             out.append(Tuils.NEWLINE).append("expert.xml not readable; remote/root/custom-command checks are incomplete.");
         }
@@ -214,8 +256,12 @@ public class security extends ParamCommand {
         }
         String rss = readLimited(new File(folder, "rss.xml"), 512 * 1024);
         int malformedRss = countInvalidRssUrls(rss);
-        if (malformedRss > 0) out.append(Tuils.NEWLINE).append("[HIGH] ").append(malformedRss).append(" RSS entry URL(s) do not begin with http:// or https://. Review rss.xml.");
-        if (httpCount > 0) out.append(Tuils.NEWLINE).append("[MEDIUM] ").append(httpCount).append(" plain-HTTP reference(s) found in scanned config files; prefer HTTPS where supported.");
+        if (malformedRss > 0) {
+            out.append(Tuils.NEWLINE).append("[HIGH] ").append(malformedRss).append(" RSS entry URL(s) do not begin with http:// or https://. Review rss.xml.");
+        }
+        if (httpCount > 0) {
+            out.append(Tuils.NEWLINE).append("[MEDIUM] ").append(httpCount).append(" plain-HTTP reference(s) found in scanned config files; prefer HTTPS where supported.");
+        }
         line(out, "Files inspected", String.valueOf(read));
         line(out, "Config storage", "shared external storage; not private app storage");
         if (read == 0) out.append(Tuils.NEWLINE).append("No known configuration files could be read. Check storage access.");
@@ -236,8 +282,11 @@ public class security extends ParamCommand {
         line(out, "Port setting", port ? "configured (value hidden)" : "not configured");
         line(out, "Username setting", user ? "configured (value hidden)" : "not configured");
         line(out, "Password setting", pass ? "configured (value hidden)" : "not configured");
-        if (pass && isWeakPassword(password)) out.append(Tuils.NEWLINE).append("[HIGH] Configured remote password appears short or common. Replace it with a unique random passphrase.");
-        else if (pass) out.append(Tuils.NEWLINE).append("[REVIEW] A remote password is stored as plain text in shared external storage. Strong length does not encrypt the file.");
+        if (pass && isWeakPassword(password)) {
+            out.append(Tuils.NEWLINE).append("[HIGH] Configured remote password appears short or common. Replace it with a unique random passphrase.");
+        } else if (pass) {
+            out.append(Tuils.NEWLINE).append("[REVIEW] A remote password is stored as plain text in shared external storage. Strong length does not encrypt the file.");
+        }
         out.append(Tuils.NEWLINE).append("This app source contains no remote server/listener implementation for these expert.xml fields. This command audits values only; it cannot stop a separate Termux script or companion service.");
         out.append(Tuils.NEWLINE).append("Never share expert.xml. If remote access is unused, disable the separate service and remove its credentials there.");
         return out.toString();
@@ -281,7 +330,9 @@ public class security extends ParamCommand {
         for (String permission : requested) {
             if ("DANGEROUS".equals(permissionKind(context, permission))) {
                 stats.dangerous++;
-                if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) stats.grantedDangerous++;
+                if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+                    stats.grantedDangerous++;
+                }
             }
         }
         return stats;
@@ -291,7 +342,8 @@ public class security extends ParamCommand {
         try {
             PermissionInfo info = context.getPackageManager().getPermissionInfo(name, 0);
             int base = info.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
-            return base == PermissionInfo.PROTECTION_DANGEROUS ? "DANGEROUS" : (base == PermissionInfo.PROTECTION_NORMAL ? "NORMAL" : "SIGNATURE/OTHER");
+            return base == PermissionInfo.PROTECTION_DANGEROUS ? "DANGEROUS" :
+                    (base == PermissionInfo.PROTECTION_NORMAL ? "NORMAL" : "SIGNATURE/OTHER");
         } catch (Exception e) {
             return "UNKNOWN";
         }
@@ -303,7 +355,8 @@ public class security extends ParamCommand {
     }
 
     private static int countExported(PackageInfo info) {
-        return countExported(info.activities) + countExported(info.services) + countExported(info.receivers) + countExported(info.providers);
+        return countExported(info.activities) + countExported(info.services) +
+                countExported(info.receivers) + countExported(info.providers);
     }
 
     private static int countExportedWithoutPermission(PackageInfo info) {
@@ -313,14 +366,44 @@ public class security extends ParamCommand {
 
     private static int countExported(ComponentInfo[] components) {
         int count = 0;
-        if (components != null) for (ComponentInfo component : components) if (component.exported && component.enabled) count++;
+        if (components != null) {
+            for (ComponentInfo component : components) {
+                if (component.exported && component.enabled) count++;
+            }
+        }
         return count;
+    }
+
+    /**
+     * ComponentInfo itself has no permission field in compileSdk 27.
+     * ActivityInfo and ServiceInfo use their own permission field. Providers
+     * have separate read/write permissions, so both must be set to consider
+     * the provider protected for every operation.
+     */
+    private static boolean hasComponentPermission(ComponentInfo component) {
+        if (component instanceof ActivityInfo) {
+            return hasText(((ActivityInfo) component).permission);
+        }
+        if (component instanceof ServiceInfo) {
+            return hasText(((ServiceInfo) component).permission);
+        }
+        if (component instanceof ProviderInfo) {
+            ProviderInfo provider = (ProviderInfo) component;
+            return hasText(provider.readPermission) && hasText(provider.writePermission);
+        }
+        return false;
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && value.trim().length() > 0;
     }
 
     private static int countExportedWithoutPermission(ComponentInfo[] components) {
         int count = 0;
-        if (components != null) for (ComponentInfo component : components) {
-            if (component.exported && component.enabled && (component.permission == null || component.permission.length() == 0)) count++;
+        if (components != null) {
+            for (ComponentInfo component : components) {
+                if (component.exported && component.enabled && !hasComponentPermission(component)) count++;
+            }
         }
         return count;
     }
@@ -335,10 +418,12 @@ public class security extends ParamCommand {
         if (hasValue(expert, "exit_password")) risks.add("exit password field present (masked)");
         if (isTrue(expert, "use_root")) risks.add("root mode enabled");
         if (hasValue(expert, "custom_command")) risks.add("custom command configured");
-        if (hasAnyValue(folder, new String[]{"behavior.xml", "notifications.xml", "rss.xml", "expert.xml", "cmd.xml"}, new String[]{"weather_key", "api_key", "access_token", "auth_token"})) risks.add("API credential field present (masked)");
+        if (hasAnyValue(folder, new String[]{"behavior.xml", "notifications.xml", "rss.xml", "expert.xml", "cmd.xml"},
+                new String[]{"weather_key", "api_key", "access_token", "auth_token"})) {
+            risks.add("API credential field present (masked)");
+        }
         return risks.size() == 0 ? "no flagged expert.xml fields found" : join(risks, ", ");
     }
-
 
     private static boolean hasAnyValue(File folder, String[] files, String[] tags) {
         for (String fileName : files) {
@@ -372,7 +457,8 @@ public class security extends ParamCommand {
 
     private static String getValue(String xml, String tag) {
         if (xml == null) return null;
-        Pattern pattern = Pattern.compile("<\\s*" + Pattern.quote(tag) + "\\b[^>]*\\bvalue\\s*=\\s*(['\"])(.*?)\\1", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        Pattern pattern = Pattern.compile("<\\s*" + Pattern.quote(tag) + "\\b[^>]*\\bvalue\\s*=\\s*(['\"])(.*?)\\1",
+                Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         Matcher matcher = pattern.matcher(xml);
         return matcher.find() ? matcher.group(2).trim() : null;
     }
@@ -385,8 +471,9 @@ public class security extends ParamCommand {
     private static boolean isWeakPassword(String value) {
         if (value == null || value.length() < 12) return true;
         String normalized = value.toLowerCase(Locale.US);
-        return "password".equals(normalized) || "admin123".equals(normalized) || "123456789012".equals(normalized) ||
-                "qwerty123456".equals(normalized) || "000000000000".equals(normalized);
+        return "password".equals(normalized) || "admin123".equals(normalized) ||
+                "123456789012".equals(normalized) || "qwerty123456".equals(normalized) ||
+                "000000000000".equals(normalized);
     }
 
     private static int countInvalidRssUrls(String xml) {
