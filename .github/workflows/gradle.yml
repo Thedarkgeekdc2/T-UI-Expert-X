@@ -18,42 +18,55 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # The project uses Gradle 6.1.1 and Android Gradle Plugin 4.0.0-alpha09.
-      # Gradle 6.1.1 cannot run on JDK 17; use a compatible JDK 8 runtime.
-      - name: Set up JDK 8
+      # Android Command-line Tools 16 requires JDK 17.
+      - name: Set up JDK 17 for Android SDK tools
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK 27 and Build Tools 28.0.3
+        shell: bash
+        run: |
+          set -o pipefail
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-27" "build-tools;28.0.3"
+
+      # Gradle 6.1.1 runs on Java 8-13; it cannot run on Java 17.
+      - name: Switch to JDK 8 for legacy Gradle 6.1.1
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "8"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install required Android SDK packages
+      - name: Verify Java and Android SDK
         run: |
-          yes | sdkmanager --licenses >/dev/null
-          sdkmanager "platform-tools" "platforms;android-27" "build-tools;28.0.3"
-
-      - name: Make Gradle wrapper executable
-        run: chmod +x ./gradlew
+          java -version
+          test -d "$ANDROID_HOME/platforms/android-27"
+          test -d "$ANDROID_HOME/build-tools/28.0.3"
 
       - name: Build F-Droid debug APK
-        run: ./gradlew --no-daemon --stacktrace :app:assembleFdroidDebug
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon --stacktrace :app:assembleFdroidDebug
 
-      - name: Verify APK was generated
+      - name: Find generated APK
         id: apk
         shell: bash
         run: |
           APK_PATH="$(find app/build/outputs/apk -type f -name '*.apk' -print -quit)"
           if [ -z "$APK_PATH" ]; then
-            echo "No APK file found under app/build/outputs/apk"
+            echo "APK was not generated."
+            find app/build/outputs -maxdepth 5 -type f -print || true
             exit 1
           fi
           echo "path=$APK_PATH" >> "$GITHUB_OUTPUT"
-          echo "Generated APK: $APK_PATH"
           ls -lh "$APK_PATH"
 
-      - name: Upload installable APK
+      - name: Upload installable APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: T-UI-Expert-X-debug-APK
