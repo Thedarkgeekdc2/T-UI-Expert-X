@@ -1,0 +1,31 @@
+T-UI EXPERT X — PHASE 3
+Smart Automation Engine
+
+App version: 0.5.3 (versionCode 12)
+Package: com.thedarkgeekdc.tuiexpert
+Maintainer: TheDarkGeekDC
+
+New commands:
+- automate -status
+- automate -battery 20 (allowed threshold: 5–50 percent; 15-minute checks)
+- automate -batteryoff
+- automate -chargeon / automate -chargeoff
+- automate -wifion / automate -wifioff (15-minute network state checks)
+- automate -timer 15 Take a break (one-time reminder; 1 minute to 7 days)
+- automate -daily 08:30 Morning routine (daily local-time reminder)
+- automate -cancel (cancels timer and daily reminder only)
+- automate -alloff (disable all alerts and reminders)
+- automate -backup (allowlisted configuration ZIP)
+
+Implementation details:
+- AlarmManager alarms are inexact where recurring; no exact-alarm special access is requested.
+- Battery and network checks run every 15 minutes only when enabled.
+- Charging events use system POWER_CONNECTED / POWER_DISCONNECTED broadcasts.
+- Daily reminders are restored after BOOT_COMPLETED.
+- Notifications use a dedicated channel on Android 8.0+. Device notification settings can still block them.
+- Config backup writes to the app-specific Documents directory and includes an explicit allowlist.
+- expert.xml is excluded because it may contain remote-access credentials; crash logs and arbitrary files are excluded.
+- Automations show notifications only. They do not execute arbitrary shell commands, toggle radios, access messages, or run scripts invisibly.
+- No root is required. No new dangerous runtime permission is added. RECEIVE_BOOT_COMPLETED is added so scheduled daily reminders and polling can be restored after reboot.
+
+Validation results: all 40 static checks passed; two new Java files compiled against isolated lightweight Android/app API stubs. Full Android Gradle build and device tests remain unverified because Android SDK/android.jar are not installed and the Gradle 6.1.1 distribution is not cached in this workspace.

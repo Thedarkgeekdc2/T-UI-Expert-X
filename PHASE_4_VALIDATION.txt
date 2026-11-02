@@ -1,0 +1,34 @@
+T-UI EXPERT X — PHASE 4 VALIDATION REPORT
+Version: 0.5.4 (versionCode 13)
+Package: com.thedarkgeekdc.tuiexpert
+Maintainer: TheDarkGeekDC
+
+RESULTS
+- 46/46 static project checks passed.
+- All 23 Android source XML files parsed successfully.
+- security.java compiled with javac -source 8 -target 8 against isolated lightweight Android/application API stubs.
+- Permission audit is read-only; it does not request/grant/revoke permissions.
+- Remote credentials/API key fields are detected by presence and are not printed or copied to generated reports.
+- Sanitized reports are written under private app internal storage.
+- Android backup disabled in manifest.
+- Cleartext traffic policy disabled for Android 6.0/API 23 and later.
+- Built-in weather and connectivity checks use HTTPS.
+- MusicService and NotificationMonitorService explicitly non-exported.
+- Notification listener remains protected by BIND_NOTIFICATION_LISTENER_SERVICE.
+- Broad FileProvider /storage root-path removed.
+- Phase 1 Cyber Toolbox, Phase 2 Monitor and Phase 3 Automation source classes retained.
+- Upstream credits and GPLv3 license retained.
+
+NOT VERIFIED
+- Full Android Gradle build / APK compilation.
+- Install, launch, permission and notification behaviour on a physical Android device.
+- Runtime access to /sdcard/t-ui on different Android/OEM versions.
+
+REASON
+This workspace has no Android SDK platform/android.jar. The legacy Gradle wrapper distribution is not cached and cannot be downloaded from this network-restricted environment. A full APK build and device test must be completed on a machine with the matching Android SDK/JDK/Gradle toolchain.
+
+SECURITY NOTES
+- Legacy T-UI configuration remains in shared external storage and is not encrypted at rest.
+- expert.xml may contain remote credentials; never share it publicly.
+- T-UI source does not include a remote listener for remote_* values; the audit cannot disable an independent Termux/third-party service.
+- Existing broad legacy permissions were not silently revoked.

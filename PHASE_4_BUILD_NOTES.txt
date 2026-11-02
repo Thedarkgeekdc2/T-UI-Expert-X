@@ -1,0 +1,28 @@
+T-UI Expert X — Phase 4 build notes
+
+Source version: 0.5.4 (versionCode 13)
+Application ID: com.thedarkgeekdc.tuiexpert
+
+New command: security
+Run security -help for all subcommands.
+
+Build command (on a machine with required Android SDK/JDK and Gradle distribution):
+  ./gradlew :app:assembleFdroidDebug
+
+Full APK build not run in this workspace:
+- No Android SDK platform/android.jar is installed.
+- Gradle 6.1.1 wrapper distribution is not cached and network download is unavailable here.
+
+Static/source validation:
+- All app source XML files parsed.
+- New security.java command compiled with javac -source 8 -target 8 against isolated Android/app API stubs.
+- Manifest hardening and HTTPS endpoint checks passed.
+- Credential masking checks passed.
+- Phase 1/2/3 command modules retained.
+
+Security notes:
+- allowBackup=false disables Android Auto Backup for the app.
+- cleartext policy is enforced on Android 6.0/API 23+.
+- user config is still stored in the legacy shared external-storage t-ui folder. Credential fields are masked by security commands but are not encrypted at rest.
+- expert.xml is excluded from automate -backup. Security -report stores only a sanitized report privately.
+- No permissions are silently granted or revoked.

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<APPS>
+<!-- ### default-suggested apps ### -->
+<default_app_n1 value="com.android.contacts-com.android.contacts.activities.TwelveKeyDialer"/>
+<default_app_n2 value="com.android.vending"/>
+<default_app_n3 value="most_used"/>
+<default_app_n4 value="most_used"/>
+<default_app_n5 value="most_used"/>
+
+<app_groups_sorting value="2"/>
+<!-- 0 = time up->
+down; 1 = time down->
+up; 2 = alphabetical up->
+down; 3 = alphabetical down->
+up; 4 = most used up->
+down; 5 = most used down->
+up -->
+
+<com.instapro.android-com.instagram.android.activity.MainTabActivity1 show="true"/>
+<com.whatsapp.w4b-com.whatsapp.Main show="true"/>
+<com.vivo.gallery-com.android.gallery3d.vivo.GalleryTabActivity show="true"/>
+<com.grindrapp.android-com.grindrapp.android.HomeActivityOriginal show="true"/>
+<com.bbk.theme-com.bbk.theme.Theme show="false"/>
+</APPS>

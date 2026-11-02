@@ -1,0 +1,29 @@
+T-UI Expert X Phase 5 build notes
+
+Application ID: com.thedarkgeekdc.tuiexpert
+Version: 0.5.5 (14)
+
+Build from project root with Android SDK + required Build Tools installed:
+  ./gradlew assembleFdroidDebug
+  ./gradlew assembleFdroidRelease
+
+This is a legacy Android Gradle project (AGP 4.0.0-alpha09, compileSdk 27, buildTools 28.0.3). A compatible JDK/Gradle distribution and Android SDK platform are required. Full APK compilation is not claimed unless those dependencies are available and the task exits successfully.
+
+After installing the APK on the target phone:
+  dashboard
+  dashboard -profile
+  restart
+  dashboard -cyber
+  dashboard -device
+  dashboard -automation
+  dashboard -security
+  dashboard -search battery
+
+Remote-access settings:
+- Keep the current /sdcard/t-ui/expert.xml in place.
+- The screenshot profile never replaces that file.
+- It updates only custom_command, custom_command_timeout, custom_command_size, custom_command_index and show_custom_command in-place.
+- Remote-access user/password/port values are not displayed, copied into APK assets, or changed.
+- Existing /sdcard/t-ui/alias.txt is never overwritten.
+
+The explicit dashboard -profile command stores a local dated backup inside /sdcard/t-ui before replacing visual profile files. Inspect the reported backup path before deleting any old settings.

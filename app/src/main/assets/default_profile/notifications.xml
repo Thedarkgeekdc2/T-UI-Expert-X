@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NOTIFICATIONS>
+
+<show_notifications value="true"/>
+<app_notification_enabled_default value="false"/>
+<default_notification_color value="#ffffff"/>
+<!--notification_format value="%[#E4F34A]title %n%[#ffffff]text"-->
+
+<notification_format value="%n %app | (%t1) %n[ root@system ] %n╠═══(%[#39FF14]title) %n╚══════════⫸%[#00FF00]text"/>
+<click_notification value="true"/>
+<long_click_notification value="true"/>
+<notification_popup_exclude_app value="true"/>
+<notification_popup_exclude_notification value="true"/>
+<notification_popup_reply value="true"/>
+<!-- ================= ENABLED APPS ================= -->
+
+<!-- Telegram -->
+<org.telegram.plus enabled="true" color="#FF0088cc" format="1"/>
+
+<!-- WhatsApp -->
+<com.whatsapp enabled="true" color="#FF50fa7b" format="2"/>
+
+<!-- Twitter -->
+<com.twitter.android enabled="true" color="#FF01C9FC" format="3"/>
+
+<!-- Instagram -->
+<com.instagram.android enabled="true" color="#FFFC01C9" format="4"/>
+<com.instapro.android enabled="true" color="#36747d" format="33"/>
+
+<!-- Phone / Calls -->
+<com.android.dialer enabled="true" color="#FF8be9fd" format="5"/>
+<com.android.incallui enabled="true" color="#FF8be9fd" format="5"/>
+
+<!-- SMS -->
+<com.android.providers.telephony enabled="true" color="#ffffb86c" format="6"/>
+<com.google.android.apps.messaging enabled="true" color="#ffffb86c" format="6"/>
+
+<!-- Gmail -->
+<com.google.android.gm enabled="true" color="#fff0ff4a" format="7"/>
+
+<!-- Spotify -->
+<com.spotify.music enabled="true" color="#FF50fa7b" format="8"/>
+
+<!-- YouTube (disabled) -->
+<app.revanced.android.youtube enabled="false" color="#FFff5555" format="9"/>
+
+<!-- IDM -->
+<idm.internet.download.manager.plus enabled="true" color="#FFbd93f9" format="10"/>
+
+<!-- ================= FORMATS ================= -->
+
+<!-- 1 : Telegram -->
+<format id="1" value="%n %app | (%t1) %n╠═══(%[#7CFC00]title) %n╚══════════⫸%[#FFFFFFFF]text"/>
+
+<!-- 2 : WhatsApp -->
+<format id="2" value="%n %app | (%t1) %n╠═══(%[#B0E2FF]title) %n╚══════════⫸%[#FFFFFFFF]text"/>
+
+<!-- 3 : Twitter -->
+<format id="3" value="%n %app | (%t1) %n╠═══(%[#7CFC00]title) %n╚══════════⫸%[#FFFFFFFF]text"/>
+
+<!-- 4 : Instagram -->
+<format id="4" value="%n %app | (%t1) %n╠═══(%[#B0E2FF]title) %n╚══════════⫸%[#FFFFFFFF]text"/>
+
+<format id="33" value="%n %app | (%t1) %n◯◦◦ (%[#FF4D6D]title) ◦◦◯ %n≈≈≈ %[#FFF0F5]text 💖 ≈≈≈"/>
+
+<!-- 5 : Phone -->
+<format id="5" value="%n %app | (%t1) %n╠═══(%[#7CFC00]title) %n╚══════════⫸%[#CDC9A5]text"/>
+
+<!-- 6 : SMS -->
+<format id="6" value="%n %app | (%t1) %n╠═══(%[#B0E2FF]title) %n╚══════════⫸%[#FFFFFFFF]text"/>
+
+<!-- 7 : Gmail -->
+<format id="7" value="%n %app | (%t1) %n╠═══(%[#FFD700]title) %n╚══════════⫸%[#FFFFFFFF]text"/>
+
+<!-- 8 : Spotify -->
+<format id="8" value="%n %app | (%t1) %n╠═══(%[#B0E2FF]title) %n╚══════════⫸%[#FFFFFFFF]text"/>
+
+<!-- 9 : YouTube -->
+<format id="9" value="%n %app | (%t1) %n╠═══(%[#7CFC00]title) %n╚══════════⫸%[#FFFFFFFF]text"/>
+
+<!-- 10 : IDM / Downloads -->
+<format id="10" value="%n %app | (%t1) %n╠═══(%[#B0E2FF]title) %n╚══════════⫸%[#CDC9A5]text"/>
+
+<!-- ================= FILTERS (ONLY HIDE) ================= -->
+
+<!-- Broken / empty -->
+<filter id="11" value="null"/>
+
+<!-- WhatsApp reaction spam -->
+<filter id="12" value="Reacted"/>
+
+<!-- Timer junk -->
+<filter id="13" value="seconds left"/>
+<filter id="14" value="Weather updated"/>
+<filter id="15" value="Checking for new messages"/>
+ 
+<!-- ================= DISABLED SYSTEM APPS ================= -->
+
+<android enabled="true"/>
+<notification_whitelist value=""/>
+<notification_blacklist value=""/>
+<filter id="-1" value="%n %app | (%t1) %n[ root@system ] %n╠═══(Wi‑Fi hotspot on) %n╚══════════⫸1 device connected, Shared mobile data: 387.8MB"/>
+<com.openai.chatgpt enabled="true"/>
+</NOTIFICATIONS>

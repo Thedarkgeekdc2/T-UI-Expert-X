@@ -1,0 +1,33 @@
+T-UI EXPERT X — PHASE 5
+Custom Command Dashboard + Screenshot-Matched Default Profile
+
+App version: 0.5.5 (versionCode 14)
+Package: com.thedarkgeekdc.tuiexpert
+Maintainer: TheDarkGeekDC
+
+New dashboard command:
+- dashboard
+- dashboard -cyber
+- dashboard -device
+- dashboard -automation
+- dashboard -security
+- dashboard -launcher
+- dashboard -search <keyword>
+- dashboard -favorites
+- dashboard -pin dkx_name <safe-command>
+- dashboard -unpin dkx_name
+- dashboard -profile
+
+Profile improvements:
+- First-run seeding copies defaults only when files are missing.
+- Explicit profile apply backs up existing visual configuration files.
+- Existing expert.xml is not replaced; only five visual custom-command fields are updated in place.
+- Existing remote-access credentials, exit password, root setting and all other expert.xml fields remain untouched.
+- Existing alias.txt is never overwritten.
+- Existing weather API key is preserved during profile apply and is not bundled in APK assets.
+- Screenshot profile uses black background, green output, red labels, yellow/red status borders, Lucida Console and portrait layout.
+- Invalid UTF-16 surrogate XML references normalized to legal Unicode.
+- Invalid duplicate RSS app-package entries removed.
+- Bundled sysinfo script endpoints changed to HTTPS.
+
+All prior phase source code retained.

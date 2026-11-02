@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<HTMLEXTRACT>
+
+    <!-- JSONPath: result + all possible id/number fields -->
+    <json id="1"
+          value="
+$..result[*],
+$..number,
+$..mobile,
+$..msisdn,
+$..id,
+$..pan,
+$..registration,
+$..aadhaar,
+$..gst,
+$..upi,
+$..query
+"/>
+
+    <!-- FORMAT -->
+    <format id="1"
+value="
+%a(%an := %av)(%n)
+%n------------------------------
+"/>
+
+</HTMLEXTRACT>

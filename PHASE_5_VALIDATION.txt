@@ -1,0 +1,25 @@
+T-UI Expert X — Phase 5 validation report
+Application ID: com.thedarkgeekdc.tuiexpert
+Version: 0.5.5 (version code 14)
+
+Static validation:
+- 47/47 project checks passed.
+- All 37 Android source XML files and 14 default-profile XML files parsed successfully.
+- Dashboard category, search, favorites, pin/unpin and profile handlers found.
+- Pinned shortcuts are restricted to the dkx_ namespace and a command/argument allowlist.
+- Shell chaining, shell operators, paths and arbitrary commands are rejected by pin validation.
+- Existing expert.xml is not packaged with remote credentials; the bundled template contains only five visual settings.
+- Explicit profile apply backs up before copying, excludes expert.xml and alias.txt, and updates only five visual fields in expert.xml.
+- Existing weather_key is preserved without being packaged.
+- User header art, terminal palette, portrait profile and toolbar preferences are included.
+- Existing personal alias.txt, remote-access values and crash.txt are not included or overwritten.
+- Upstream credits and license files retained.
+
+Java sanity compilation:
+- dashboard.java and ProfileInstaller.java compiled with javac -source 8 -target 8 against lightweight Android/T-UI API stubs.
+- Result: PASS (only JDK 21 obsolete source/target and bootstrap-classpath warnings).
+- This is a syntax/type sanity check, not a full Android application build.
+
+Not completed:
+- Full Gradle APK build: not run to completion because Android SDK/platform is not installed in this workspace and a compatible legacy Gradle/Android toolchain is not locally provisioned.
+- Physical-device runtime testing: pending.

@@ -1,0 +1,34 @@
+T-UI EXPERT X — PHASE 4
+Security & Privacy Center
+
+App version: 0.5.4 (versionCode 13)
+Package: com.thedarkgeekdc.tuiexpert
+Maintainer: TheDarkGeekDC
+
+New commands:
+- security -audit
+- security -permissions
+- security -privacy
+- security -config
+- security -remote
+- security -settings
+- security -report
+- security -help
+
+Security improvements:
+- Disable Android app backup (allowBackup=false).
+- Disallow cleartext traffic from Android 6.0/API 23 onward.
+- Change built-in weather and connectivity-check requests to HTTPS.
+- Make internal MusicService and NotificationMonitorService non-exported.
+- Keep NotificationListenerService exported only behind BIND_NOTIFICATION_LISTENER_SERVICE.
+- Remove broad /storage root-path from FileProvider paths.
+- Add masked audits for remote password, exit password, API-key, root and custom-command configuration fields.
+- Save sanitized audit reports only in private app storage; never include secret values or raw config files.
+- Retain existing legacy permissions and expose their grant state rather than revoking them automatically.
+
+Prior phases retained:
+- Phase 1 Advanced Cyber Security Toolbox.
+- Phase 2 Live Android Device Monitor.
+- Phase 3 Smart Automation Engine.
+
+Validation: XML parsing, source/manifest checks, Java 8 syntax/type compilation against lightweight stubs, and static privacy checks. Full APK compilation and device testing remain unverified due to missing Android SDK/android.jar and unavailable cached Gradle distribution.

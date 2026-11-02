@@ -1,0 +1,40 @@
+T-UI EXPERT X — PHASE 2
+Live Android Device Monitor
+
+App version: 0.5.2 (versionCode 11)
+Package: com.thedarkgeekdc.tuiexpert
+
+Added command module:
+- monitor -all
+- monitor -battery
+- monitor -cpu
+- monitor -memory
+- monitor -storage
+- monitor -network
+- monitor -uptime
+- monitor -device
+- monitor -watch
+- monitor -stop
+- monitor -help
+
+Implementation:
+- Device data reads Android system APIs and aggregate /proc/stat counters.
+- On-demand diagnostics run on AsyncTask.THREAD_POOL_EXECUTOR.
+- Live mode publishes a device status snapshot every 5 seconds and can be stopped explicitly.
+- Live mode uses an application context and daemon scheduled executor; it ends with the launcher process.
+- No new Android permissions were added.
+- Does not read user content or require root.
+
+Validation performed:
+- Java syntax/type sanity compile against Android API stubs.
+- All project XML resources parsed.
+- New command help/resource references checked.
+- Package/version and manifest permissions checked.
+- Phase 1 cyber command retained.
+- Upstream About credits retained.
+
+Limitations:
+- Full Gradle APK build and physical-device tests are not completed in this workspace.
+- CPU usage is an aggregate sample, not per-process CPU accounting.
+- Some OEM firmware may omit battery health or temperature fields.
+- Storage reports the internal data partition accessible via Android StatFs.

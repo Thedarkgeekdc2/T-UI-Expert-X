@@ -1,0 +1,32 @@
+T-UI EXPERT X — PHASE 1
+Advanced Cyber Security Toolbox
+
+Branding retained:
+- App: T-UI Expert X
+- Maintainer: TheDarkGeekDC
+- Application ID: com.thedarkgeekdc.tuiexpert
+
+New terminal commands:
+- cyber -ip       Show local IPv4/IPv6 addresses
+- cyber -net      Show active connection and available DNS metadata
+- cyber -dns HOST Resolve a hostname
+- cyber -ping HOST Send at most four ping probes
+- cyber -trace HOST Attempt traceroute (maximum eight hops)
+- cyber -help     Show command help
+
+Implementation details:
+- Added a dynamically loaded command class under commands.main.raw.
+- DNS, ping and traceroute work asynchronously to avoid blocking the launcher UI.
+- Host input is validated; process commands use fixed argument arrays and do not invoke a shell.
+- No new dangerous Android permission was added.
+- App version: 0.5.1 (versionCode 10).
+
+Validation performed:
+- strings.xml parsed successfully.
+- Cyber command/resource, host validation, background task, bounded diagnostic, manifest permission and ProGuard rule checks passed.
+- Package and version values inspected.
+
+Limitations:
+- APK build and on-device test are NOT completed: Android SDK is not installed in this build environment.
+- Some Android firmware does not include ping/traceroute binaries. The command gives an availability message rather than installing external tools.
+- Only use against your own device and authorized hosts/networks.

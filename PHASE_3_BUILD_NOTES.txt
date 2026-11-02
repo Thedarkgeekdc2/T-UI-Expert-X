@@ -1,0 +1,32 @@
+T-UI Expert X — Phase 3 build notes
+
+Source version: 0.5.3 (versionCode 12)
+Application ID: com.thedarkgeekdc.tuiexpert
+
+Build status:
+- Source implementation is packaged.
+- All 23 Android XML files parse.
+- 40/40 project-level static validation checks pass.
+- automate.java and AutomationReceiver.java compile against isolated lightweight Android/application API stubs using Java 8 source compatibility.
+- This does NOT constitute a full Android Gradle build.
+
+A full APK build could not be run in this workspace because:
+- No Android SDK platform directory or android.jar is installed.
+- Gradle 6.1.1 is not cached; the wrapper distribution download is not available in this network-restricted workspace.
+
+Build on a machine with the matching Android SDK/Gradle toolchain:
+  ./gradlew :app:assembleFdroidDebug
+
+If the legacy Gradle plugin/build tools need changes, update them separately and run the full app build plus device tests before distributing an APK.
+
+Important runtime limitations:
+- Battery and network state checks are inexact and run every 15 minutes when enabled. Android Doze may delay them.
+- Charging plug/unplug alerts use system broadcasts.
+- Timed and daily reminders use AlarmManager and may be deferred by Android power management.
+- Notifications must be enabled by the device user.
+- Backup files are written in the app-specific Documents directory. expert.xml (may contain remote credentials), crash.txt and unknown files are excluded.
+- The network monitor records only broad connection type/state. It does not record SSID, MAC address, traffic or location.
+- This phase displays notifications only; it does not execute arbitrary commands or silently change device settings.
+
+Manual test guide: PHASE_3_AUTOMATION_ENGINE.md
+Validation script: tools/validate_phase3.py

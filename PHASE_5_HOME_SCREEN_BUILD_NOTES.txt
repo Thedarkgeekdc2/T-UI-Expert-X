@@ -1,0 +1,23 @@
+T-UI Expert X — Home Screen Behaviour Release
+Version: 0.5.7 (versionCode 16)
+
+Source checks: run python3 tools/validate_phase5.py
+
+Build prerequisites:
+- Compatible JDK for the legacy Android Gradle Plugin 4.0.0-alpha09
+- Android SDK platform 27 and build-tools 28.0.3
+- Network access for Gradle distribution and dependencies unless already cached
+
+Build variants:
+  ./gradlew assembleFdroidDebug
+  ./gradlew assembleFdroidRelease
+
+Build attempt: `./gradlew assembleFdroidDebug --offline` was blocked because the wrapper could not resolve `services.gradle.org` (UnknownHostException). `ANDROID_HOME` and `ANDROID_SDK_ROOT` are unset and no `android.jar` was found. No APK was produced; full Gradle build and physical-device verification remain required.
+
+Default behavior:
+- behavior.xml: clear_before_command=true
+- suggestions.xml: app suggestion strip remains visible on empty input
+- First-run migration updates only old stock empty-suggestions settings and preserves custom user settings
+- dashboard -apps: lists installed visible apps in T-UI
+- tap an app suggestion to launch the selected app directly from T-UI; it does not open the Android app drawer
+- expert.xml and alias.txt are not packaged or overwritten by these changes

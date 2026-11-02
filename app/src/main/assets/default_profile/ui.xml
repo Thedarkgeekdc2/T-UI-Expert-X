@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<UI>
+
+<!-- ================================================= -->
+<!-- ================= MAIN SETTINGS ================= -->
+<!-- ================================================= -->
+
+<username value="root"/>
+<device_name value="Linux"/>
+
+<show_enter_button value="true"/>
+
+<system_font value="false"/>
+<!-- Uses default t-ui font (Lucida Console) -->
+
+<system_wallpaper value="true"/>
+<fullscreen value="true"/>
+
+<input_bottom value="true"/>
+<input_prefix value="➜"/>
+<input_root_prefix value="#"/>
+
+<!-- ================================================= -->
+<!-- ============ STATUS BAR VISIBILITY ============== -->
+<!-- ================================================= -->
+
+<show_time value="true"/>
+<show_device_name value="true"/>
+<show_battery value="true"/>
+<show_ram value="true"/>
+<show_network_info value="true"/>
+<show_weather value="true"/>
+<show_notes value="true"/>
+<show_storage_info value="true"/>
+
+<show_app_installed value="true"/>
+<show_app_uninstalled value="true"/>
+
+<show_unlock_counter value="false"/>
+<show_scroll_notes_message value="true"/>
+<show_restart_message value="true"/>
+<show_session_info value="true"/>
+
+<!-- ================================================= -->
+<!-- ============ STATUS BAR TEXT SIZE =============== -->
+<!-- ================================================= -->
+
+<time_size value="19"/>
+<device_size value="16"/>
+<battery_size value="15"/>
+<ram_size value="16"/>
+<network_size value="16"/>
+<storage_size value="16"/>
+<weather_size value="14"/>
+<notes_size value="14"/>
+<unlock_size value="14"/>
+<input_output_size value="16"/>
+
+<!-- ================================================= -->
+<!-- ============ STATUS BAR INDEX ORDER ============== -->
+<!-- ================================================= -->
+
+<network_index value="1.0"/>
+<ram_index value="1.1"/>
+<battery_index value="1.2"/>
+<device_index value="2.0"/>
+<time_index value="2.3"/>
+<weather_index value="4.1"/>
+<storage_index value="2.2"/>
+<custom_command_index value="4"/>
+<notes_index value="5"/>
+<cpu_index value="2.1"/>
+
+<!-- ================================================= -->
+<!-- ================= NOTES SETTINGS ================ -->
+<!-- ================================================= -->
+
+<notes_divider value="%n"/>
+<notes_header value="╔════════════════════════════════════╗%n"/>
+<notes_footer value="%(%n╚════════════════════════════════════╝/n)"/>
+<notes_max_lines value="10"/>
+
+<!-- ================================================= -->
+<!-- ================= UI EFFECTS ===================== -->
+<!-- ================================================= -->
+
+<bgrect_params value="2,40"/>
+<!-- [Stroke width, Corner radius] -->
+
+<shadow_params value="0,3,8,120"/>
+<!-- [X offset, Y offset, Blur radius, Alpha] -->
+
+<text_redraw_times value="5"/>
+<statusbar_light_icons value="true"/>
+<ignore_bar_color value="false"/>
+
+<enable_battery_status value="true"/>
+
+<!-- ================================================= -->
+<!-- ============ MARGINS & ALIGNMENT ================ -->
+<!-- ==================================v============= -->
+
+<display_margin_mm value="0"/>
+
+<status_lines_margins value="0,0,0,0"/>
+<output_field_margins value="5,0,30,30"/>
+
+<input_field_margins value="1,1,0,30"/>
+<input_area_margins value="10,10,0,0"/>
+
+<notes_margins value="0,18,0,0"/>
+<toolbar_margins value="1,4,0,12"/>
+<suggestions_area_margin value="4,0,0,0"/>
+
+<status_lines_alignment value="0,0,0,0,0,0"/>
+
+<!-- ================================================= -->
+<!-- ============ CPU / MUSIC SETTINGS =============== -->
+<!-- ================================================= -->
+
+<show_music value="true"/>
+<show_cpu value="true"/>
+
+<cpu_size value="16"/>
+<music_size value="14"/>
+
+<status_borders value="false"/>
+
+<music_index value="1"/>
+<unlock_index value="1"/>
+</UI>

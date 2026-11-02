@@ -1,0 +1,22 @@
+T-UI EXPERT X — PHASE 2 BUILD NOTES
+
+Project version: 0.5.2 (versionCode 11)
+Package ID: com.thedarkgeekdc.tuiexpert
+
+Build variant (F-Droid flavor debug):
+  ./gradlew :app:assembleFdroidDebug
+
+Expected environment:
+- Compatible JDK for Gradle 6.1.1 / Android Gradle Plugin 4.0.0-alpha09.
+- Android SDK Platform 27.
+- Android Build Tools 28.0.3.
+- Network access to resolve the wrapper distribution and Maven/Google dependencies on first build.
+
+In this workspace the Gradle wrapper attempted to download Gradle 6.1.1 but failed with
+UnknownHostException: services.gradle.org. Android SDK environment variables/platform
+installation are also not configured here. Therefore no APK was produced and no on-device
+test is claimed.
+
+Before installing a test build, retain the original T-UI app and its config backup. The new
+application ID makes T-UI Expert X a separate Android app. Do not uninstall the original
+until all user configuration and launcher settings have been backed up.

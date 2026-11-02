@@ -1,0 +1,21 @@
+T-UI Expert X — Home Screen Behaviour Validation
+Version: 0.5.7 (version code 16)
+
+Static validation: 65/65 checks passed (37 source XML + 14 default-profile XML files parsed).
+
+Static validation: 65/65 checks passed (37 source XML + 14 profile XML files parsed).
+Implemented:
+- In-TUI app browser command: dashboard -apps
+- Empty-input app suggestion strip combines configured app favourites and visible installed apps
+- Startup migrates only the original stock empty-app-suggestions defaults; custom settings remain unchanged
+- Existing suggestions.xml is backed up before changing legacy defaults
+- Up to eight app suggestions can be shown; suggestion chips use existing click-to-launch handling
+- No system app drawer/home intent is used by the app browser
+- clear_before_command=true clears only terminal transcript before each non-empty command
+- Current input/command is displayed again, followed by its output
+- Status/header, prompt/input, toolbar, suggestions, and stored command history remain intact
+- Setting clear_before_command=false restores the old scrolling transcript behaviour
+- expert.xml and alias.txt remain external user configuration and are not overwritten
+
+Validation script: tools/validate_phase5.py
+Full Gradle APK build attempted but blocked: Gradle 6.1.1 distribution download failed with UnknownHostException for services.gradle.org; Android SDK platform tools are also absent. Physical-device testing remains pending.
