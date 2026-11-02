@@ -18,10 +18,8 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # The runner image already contains Android SDK command-line tools.
-      # Do NOT use android-actions/setup-android here: its default package
-      # list still asks sdkmanager for the removed legacy package "tools".
-      - name: Set up JDK 17 for sdkmanager
+      # Android command-line tools require JDK 17.
+      - name: Set up JDK 17 for Android SDK tools
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -41,7 +39,7 @@ jobs:
             SDKMANAGER="$(command -v sdkmanager || true)"
           fi
           if [ -z "$SDKMANAGER" ]; then
-            echo "sdkmanager not found. Android SDK root: $SDK_ROOT"
+            echo "sdkmanager not found under $SDK_ROOT"
             exit 1
           fi
           echo "sdkmanager=$SDKMANAGER" >> "$GITHUB_OUTPUT"
@@ -55,11 +53,15 @@ jobs:
           SDKMANAGER: ${{ steps.android.outputs.sdkmanager }}
         run: |
           set -e
-          yes | "$SDKMANAGER" --licenses >/dev/null
+          # sdkmanager exits as soon as licenses are accepted. Without pipefail,
+          # the pipeline correctly returns sdkmanager's exit status, not yes's
+          # expected SIGPIPE/Broken-pipe status.
+          set +o pipefail
+          yes 2>/dev/null | "$SDKMANAGER" --licenses >/dev/null
+          set -o pipefail
           "$SDKMANAGER" "platform-tools" "platforms;android-27" "build-tools;28.0.3"
 
-      # This project uses Gradle 6.1.1 + Android Gradle Plugin 4.0.0-alpha09.
-      # Switch back to JDK 8 only after SDK manager tasks are complete.
+      # Legacy Gradle 6.1.1 + AGP 4.0.0-alpha09 must run on JDK 8.
       - name: Set up JDK 8 for legacy Gradle
         uses: actions/setup-java@v4
         with:
@@ -72,7 +74,7 @@ jobs:
           java -version
           test -d "$ANDROID_HOME/platforms/android-27"
           test -d "$ANDROID_HOME/build-tools/28.0.3"
-          test -x ./gradlew || chmod +x ./gradlew
+          chmod +x ./gradlew
 
       - name: Build F-Droid debug APK
         run: ./gradlew --no-daemon --stacktrace :app:assembleFdroidDebug
@@ -83,7 +85,7 @@ jobs:
         run: |
           APK_PATH="$(find app/build/outputs/apk -type f -name '*.apk' -print -quit)"
           if [ -z "$APK_PATH" ]; then
-            echo "APK was not generated. Build output files:"
+            echo "APK was not generated. Build outputs:"
             find app/build/outputs -type f -print || true
             exit 1
           fi
