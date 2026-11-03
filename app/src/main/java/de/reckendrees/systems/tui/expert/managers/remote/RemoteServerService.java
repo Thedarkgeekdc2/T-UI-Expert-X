@@ -464,10 +464,23 @@ public class RemoteServerService extends Service {
                 if ("/api/action".equals(uri) && method == Method.POST) return fileAction(params);
                 return json(Response.Status.NOT_FOUND, new JSONObject().put("error", "Endpoint not found"));
             } catch (SecurityException e) {
-                return json(Response.Status.FORBIDDEN, new JSONObject().put("error", e.getMessage()));
+                // JSONObject.put() declares JSONException on this legacy Android API.
+                // Do not construct it inside a catch block where the checked exception
+                // would otherwise escape the request handler.
+                return jsonError(Response.Status.FORBIDDEN, e.getMessage());
             } catch (Exception e) {
-                return json(Response.Status.INTERNAL_ERROR, new JSONObject().put("error", safeMessage(e)));
+                return jsonError(Response.Status.INTERNAL_ERROR, safeMessage(e));
             }
+        }
+
+        private Response jsonError(Response.Status status, String message) {
+            JSONObject object = new JSONObject();
+            try {
+                object.put("error", message == null ? "Request failed." : message);
+            } catch (org.json.JSONException ignored) {
+                // The fallback response remains valid JSON even if insertion fails.
+            }
+            return json(status, object);
         }
 
         private boolean validBodyLength(IHTTPSession session, long maximum) {
