@@ -1,0 +1,101 @@
+name: Build T-UI Expert X APK
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build installable Android APK
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # Android command-line tools require JDK 17.
+      - name: Set up JDK 17 for Android SDK tools
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Locate preinstalled Android SDK
+        id: android
+        shell: bash
+        run: |
+          set -e
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "$SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
+          SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager 2>/dev/null | sort -V | tail -n 1)"
+          if [ -z "$SDKMANAGER" ]; then
+            SDKMANAGER="$(command -v sdkmanager || true)"
+          fi
+          if [ -z "$SDKMANAGER" ]; then
+            echo "sdkmanager not found under $SDK_ROOT"
+            exit 1
+          fi
+          echo "sdkmanager=$SDKMANAGER" >> "$GITHUB_OUTPUT"
+          echo "Using Android SDK: $SDK_ROOT"
+          echo "Using sdkmanager: $SDKMANAGER"
+          "$SDKMANAGER" --version
+
+      - name: Accept SDK licenses and install required packages
+        shell: bash
+        env:
+          SDKMANAGER: ${{ steps.android.outputs.sdkmanager }}
+        run: |
+          set -e
+          # sdkmanager exits as soon as licenses are accepted. Without pipefail,
+          # the pipeline correctly returns sdkmanager's exit status, not yes's
+          # expected SIGPIPE/Broken-pipe status.
+          set +o pipefail
+          yes 2>/dev/null | "$SDKMANAGER" --licenses >/dev/null
+          set -o pipefail
+          "$SDKMANAGER" "platform-tools" "platforms;android-27" "build-tools;28.0.3"
+
+      # Legacy Gradle 6.1.1 + AGP 4.0.0-alpha09 must run on JDK 8.
+      - name: Set up JDK 8 for legacy Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "8"
+
+      - name: Verify build toolchain
+        shell: bash
+        run: |
+          java -version
+          test -d "$ANDROID_HOME/platforms/android-27"
+          test -d "$ANDROID_HOME/build-tools/28.0.3"
+          chmod +x ./gradlew
+
+      - name: Build F-Droid debug APK
+        run: ./gradlew --no-daemon --stacktrace :app:assembleFdroidDebug
+
+      - name: Locate generated APK
+        id: apk
+        shell: bash
+        run: |
+          APK_PATH="$(find app/build/outputs/apk -type f -name '*.apk' -print -quit)"
+          if [ -z "$APK_PATH" ]; then
+            echo "APK was not generated. Build outputs:"
+            find app/build/outputs -type f -print || true
+            exit 1
+          fi
+          echo "path=$APK_PATH" >> "$GITHUB_OUTPUT"
+          ls -lh "$APK_PATH"
+
+      - name: Upload installable APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: T-UI-Expert-X-debug-APK
+          path: ${{ steps.apk.outputs.path }}
+          if-no-files-found: error
+          retention-days: 14

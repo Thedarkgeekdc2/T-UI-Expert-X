@@ -1,0 +1,10 @@
+APK build status for the v0.5.8 source refresh:
+
+- Source changes are prepared in this workspace.
+- A new APK has NOT been built or tested in this workspace.
+- The workspace has OpenJDK 21 but no Android SDK/android.jar and no installed Gradle distribution.
+- The project uses the legacy Android Gradle Plugin / Gradle 6.1.1 toolchain and should be built with the included GitHub Actions workflow.
+- Workflow path: .github/workflows/gradle.yml
+- Task: :app:assembleFdroidDebug
+
+Commit the source to the repository's main branch. The existing workflow builds and uploads an installable debug/test APK artifact. This is not a Play Store release APK.

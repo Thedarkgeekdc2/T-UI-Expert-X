@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<EXPERT>
-    <custom_command value="head -n 11 /sdcard/t-ui/header"/>
-    <custom_command_timeout value="600"/>
-    <custom_command_size value="5"/>
-    <custom_command_index value="4"/>
-    <show_custom_command value="true"/>
-</EXPERT>
