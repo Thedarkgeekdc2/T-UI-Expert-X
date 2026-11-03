@@ -149,6 +149,9 @@ public class SuggestionRunnable implements Runnable {
                 sggView.setTag(R.id.suggestion_id, s);
 
                 sggView.setText(text);
+                if (s.type == SuggestionsManager.Suggestion.TYPE_ALIAS) {
+                    applyFullAliasGlyphMetrics(sggView);
+                }
                 applyLauncherIcon(sggView, s);
 
 //                bg and fore
@@ -193,11 +196,27 @@ public class SuggestionRunnable implements Runnable {
         scrollView.post(scrollRunnable);
     }
 
+    /**
+     * Alias labels can contain Unicode/icon-font glyphs whose ascent and descent
+     * exceed the primary T-UI font metrics. Include fallback-font metrics so the
+     * complete alias glyph is measured and drawn instead of clipped.
+     */
+    private void applyFullAliasGlyphMetrics(TextView view) {
+        view.setIncludeFontPadding(true);
+        view.setElegantTextHeight(true);
+        view.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
+
+        // Added in API 28; use reflection to keep this source compatible with compileSdk 27.
+        try {
+            TextView.class.getMethod("setFallbackLineSpacing", boolean.class).invoke(view, true);
+        } catch (Exception ignored) {
+            // On older Android versions, includeFontPadding and elegantTextHeight remain enabled.
+        }
+    }
 
     /**
-     * Restore the launcher-style app icons that users configure in their existing
-     * apps.xml/alias.txt. The config files are read-only here; no personal shortcuts
-     * are rewritten or migrated.
+     * Restore launcher-style icons for installed-app matches only.
+     * Alias suggestions remain text-only and keep their configured labels.
      */
     private void applyLauncherIcon(TextView view, SuggestionsManager.Suggestion suggestion) {
         Drawable icon = null;
@@ -241,8 +260,6 @@ public class SuggestionRunnable implements Runnable {
         } else {
             // TextViews are recycled; clear a previous app icon before reusing one
             // for an alias, command, contact or file suggestion.
-            // TextViews are recycled: remove a previous app icon so aliases and
-            // other suggestion types remain text-only.
             view.setCompoundDrawables(null, null, null, null);
             view.setCompoundDrawablePadding(0);
             view.setMinHeight(0);
