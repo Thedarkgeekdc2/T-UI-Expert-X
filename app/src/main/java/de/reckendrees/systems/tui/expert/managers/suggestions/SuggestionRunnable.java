@@ -19,6 +19,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
@@ -194,8 +195,9 @@ public class SuggestionRunnable implements Runnable {
 
 
     /**
-     * Show launcher icons for installed-app matches only.
-     * App suggestions display icons without labels; aliases remain text-only.
+     * Restore the launcher-style app icons that users configure in their existing
+     * apps.xml/alias.txt. The config files are read-only here; no personal shortcuts
+     * are rewritten or migrated.
      */
     private void applyLauncherIcon(TextView view, SuggestionsManager.Suggestion suggestion) {
         Drawable icon = null;
@@ -224,22 +226,29 @@ public class SuggestionRunnable implements Runnable {
             int size = Math.max(1, Math.round(24f * view.getResources().getDisplayMetrics().density));
             icon = icon.mutate();
             icon.setBounds(0, 0, size, size);
+            // TextView's one-line height can be shorter than this drawable. Give the
+            // row enough vertical space and center the icon to prevent top/bottom clipping.
+            int verticalPadding = view.getPaddingTop() + view.getPaddingBottom();
+            view.setMinHeight(size + verticalPadding);
+            view.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
             view.setCompoundDrawables(icon, null, null, null);
             view.setCompoundDrawablePadding(Math.round(6f * view.getResources().getDisplayMetrics().density));
             if (suggestion.type == SuggestionsManager.Suggestion.TYPE_APP) {
-                // App suggestions are icon-only; keep the app name accessible to screen readers.
+                // Normal app results are icon-only; retain an accessible label.
                 view.setText("");
             }
-            view.setContentDescription(launchInfo == null ? suggestion.text : launchInfo.publicLabel);
+            view.setContentDescription(launchInfo.publicLabel);
         } else {
             // TextViews are recycled; clear a previous app icon before reusing one
             // for an alias, command, contact or file suggestion.
+            // TextViews are recycled: remove a previous app icon so aliases and
+            // other suggestion types remain text-only.
             view.setCompoundDrawables(null, null, null, null);
             view.setCompoundDrawablePadding(0);
+            view.setMinHeight(0);
             view.setContentDescription(suggestion.text);
         }
     }
-
 
     public void interrupt() {
         interrupted = true;
