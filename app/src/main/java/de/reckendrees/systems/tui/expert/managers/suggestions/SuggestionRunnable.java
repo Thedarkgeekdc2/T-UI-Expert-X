@@ -30,7 +30,6 @@ import java.util.List;
 import de.reckendrees.systems.tui.expert.R;
 import de.reckendrees.systems.tui.expert.commands.main.MainPack;
 import de.reckendrees.systems.tui.expert.managers.AppsManager;
-import de.reckendrees.systems.tui.expert.managers.AliasManager;
 import de.reckendrees.systems.tui.expert.managers.xml.XMLPrefsManager;
 import de.reckendrees.systems.tui.expert.managers.xml.options.Suggestions;
 
@@ -195,9 +194,8 @@ public class SuggestionRunnable implements Runnable {
 
 
     /**
-     * Restore the launcher-style app icons that users configure in their existing
-     * apps.xml/alias.txt. The config files are read-only here; no personal shortcuts
-     * are rewritten or migrated.
+     * Show launcher icons for installed-app matches only.
+     * App suggestions display icons without labels; aliases remain text-only.
      */
     private void applyLauncherIcon(TextView view, SuggestionsManager.Suggestion suggestion) {
         Drawable icon = null;
@@ -208,9 +206,6 @@ public class SuggestionRunnable implements Runnable {
             } else if (suggestion.text != null && pack.appsManager != null) {
                 launchInfo = pack.appsManager.findLaunchInfoWithLabel(suggestion.text, AppsManager.SHOWN_APPS);
             }
-        } else if (suggestion.type == SuggestionsManager.Suggestion.TYPE_ALIAS
-                && suggestion.object instanceof AliasManager.Alias) {
-            launchInfo = findAliasLaunchTarget((AliasManager.Alias) suggestion.object);
         }
 
         if (launchInfo != null) {
@@ -231,6 +226,10 @@ public class SuggestionRunnable implements Runnable {
             icon.setBounds(0, 0, size, size);
             view.setCompoundDrawables(icon, null, null, null);
             view.setCompoundDrawablePadding(Math.round(6f * view.getResources().getDisplayMetrics().density));
+            if (suggestion.type == SuggestionsManager.Suggestion.TYPE_APP) {
+                // App suggestions are icon-only; keep the app name accessible to screen readers.
+                view.setText("");
+            }
             view.setContentDescription(launchInfo == null ? suggestion.text : launchInfo.publicLabel);
         } else {
             // TextViews are recycled; clear a previous app icon before reusing one
@@ -241,22 +240,6 @@ public class SuggestionRunnable implements Runnable {
         }
     }
 
-    private AppsManager.LaunchInfo findAliasLaunchTarget(AliasManager.Alias alias) {
-        if (alias == null || alias.value == null || pack.appsManager == null) return null;
-        String target = alias.value.trim();
-        if (target.length() == 0) return null;
-        // Match a direct app label/package alias, including aliases with arguments.
-        for (AppsManager.LaunchInfo app : pack.appsManager.shownApps()) {
-            if (app == null) continue;
-            String label = app.publicLabel == null ? "" : app.publicLabel;
-            String packageName = app.componentName == null ? "" : app.componentName.getPackageName();
-            if (target.equalsIgnoreCase(label) || target.equalsIgnoreCase(packageName)
-                    || target.startsWith(label + " ") || target.startsWith(packageName + " ")) {
-                return app;
-            }
-        }
-        return null;
-    }
 
     public void interrupt() {
         interrupted = true;
